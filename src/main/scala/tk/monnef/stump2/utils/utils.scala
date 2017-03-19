@@ -1,5 +1,7 @@
 package tk.monnef.stump2
 
+import java.io.{PrintWriter, StringWriter}
+
 import org.http4s.Status
 import org.http4s.headers.{`Content-Length`, `Content-Type`}
 import org.http4s._
@@ -25,4 +27,9 @@ package object utils {
     def asHtml() = x.withContentType(Some(`Content-Type`(`text/html`)))
   }
 
+  def getStackTraceString(e: Throwable): String = {
+    val sw = new StringWriter()
+    e.printStackTrace(new PrintWriter(sw))
+    sw.toString
+  }
 }

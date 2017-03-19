@@ -17,5 +17,6 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
   "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % "1.2.0-M4",
-  "net.lightbody.bmp" % "browsermob-core" % "2.1.4"
+  "net.lightbody.bmp" % "browsermob-core" % "2.1.4",
+  "com.github.nscala-time" %% "nscala-time" % "2.16.0"
 )

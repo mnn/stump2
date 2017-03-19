@@ -11,7 +11,9 @@ case class ArticlePreview(
                            date: String,
                            category: NameUrlPair,
                            commentsCount: List[Int],
-                           imageUrl: String
+                           imageUrl: String,
+                           isActuality: Boolean,
+                           parsedDate: String
                          )
 
 case class Article(

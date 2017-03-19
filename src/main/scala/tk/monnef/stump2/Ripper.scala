@@ -10,10 +10,14 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.remote.{CapabilityType, DesiredCapabilities}
+import com.github.nscala_time.time.Imports._
+import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 
 import scalaz._
 import Scalaz._
 import utils._
+
+import scala.util.Try
 
 class Ripper {
 
@@ -65,6 +69,18 @@ class Ripper {
     getUrl(elem, selector)
   )
 
+  val articleListFmt = DateTimeFormat.forPattern("d. M. yyyy")
+
+  def getParsedDate(rawDate: String): Option[DateTime] = {
+    rawDate.toLowerCase.replace(" ", " ") match {
+      case "dnes" => DateTime.now().some
+      case "včera" => (DateTime.now() - 1.day).some
+      case x => Try(DateTime.parse(x, articleListFmt)).toOption
+    }
+  }
+
+  def getParsedDateString(rawDate: String): String = getParsedDate(rawDate).map(_.toString(ISODateTimeFormat.dateTime())).getOrElse("")
+
   def elemToArticlePreview(elem: Element): Option[ArticlePreview] = {
     val gTxt = getText(elem, _: String)
     val gUrl = getUrl(elem, _: String)
@@ -84,7 +100,7 @@ class Ripper {
     val imageUrl = if (imageDataSrc.isEmpty) imageSrc else imageDataSrc
 
     if (name.isEmpty) None
-    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount.toList, imageUrl).some
+    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount.toList, imageUrl, false, getParsedDateString(date)).some
   }
 
   def getArticleList(): List[ArticlePreview] = {
@@ -113,6 +129,11 @@ class Ripper {
     val body = elem.select("[itemprop='articleBody']").html()
 
     Article(name, imageUrl, author, date, perex, body)
+  }
+
+  def getActualitiesList(): List[ArticlePreview] = {
+    val articleElems = getParsedPage(BaseUrl).select(".box-actualities--details .article").asScala
+    articleElems.flatMap(elemToArticlePreview).map(_.copy(isActuality = true)).toList
   }
 }
 
