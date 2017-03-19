@@ -8,6 +8,8 @@ val http4sVersion = "0.15.6"
 
 resolvers += Resolver.sonatypeRepo("releases")
 
+mainClass in (Compile, run) := Some("tk.monnef.stump2.Main")
+
 libraryDependencies ++= Seq(
   "org.jsoup" % "jsoup" % "1.10.2",
   "org.seleniumhq.selenium" % "selenium-java" % "3.2.0",

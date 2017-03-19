@@ -16,6 +16,7 @@ import org.http4s.server.syntax._
 import scalaz._
 import Scalaz._
 import scalaz.concurrent.Task
+import org.http4s.server.middleware._
 
 import utils._
 
@@ -51,7 +52,7 @@ object Main extends ServerApp {
       case GET -> Root / "article" / url =>
         ripper.getArticle(url) |> encodeArticle.apply |> formatJsonAndWrap
     }
-    val services = articlesService // orElse articlesService
+    val services = CORS(articlesService) // orElse articlesService
     services
   }
 

@@ -1,6 +1,6 @@
 package tk.monnef.stump2
 
-import java.net.URLEncoder
+import java.net.{URLDecoder, URLEncoder}
 
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -84,7 +84,7 @@ class Ripper {
     val imageUrl = if (imageDataSrc.isEmpty) imageSrc else imageDataSrc
 
     if (name.isEmpty) None
-    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount, imageUrl).some
+    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount.toList, imageUrl).some
   }
 
   def getArticleList(): List[ArticlePreview] = {
@@ -93,7 +93,8 @@ class Ripper {
   }
 
   def getArticle(url: String): Article = {
-    val processedUrl = (if (url.startsWith("/")) BaseUrl else "") + url
+    val decodedUrl = if (url.startsWith("%")) URLDecoder.decode(url, "UTF-8") else url
+    val processedUrl = (if (decodedUrl.startsWith("/")) BaseUrl else "") + decodedUrl
     val doc = getParsedPage(processedUrl)
     val elems = doc.select(".content--detail")
     if (elems.size() != 1) println(s"problem with separating content of an article, found ${elems.size()}, expected 1.")
