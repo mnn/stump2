@@ -44,9 +44,15 @@ class Ripper {
       "https?://.*\\.gemius\\.pl.*",
       "https?://.*\\.doubleclick\\.net.*",
       "https?://.*\\.onaudience\\.com.*",
-      "https?://.*\\.googlesyndication.com.*",
-      "https?://.*\\.bkrtx.com.*",
-      "https?://.*\\.getsitecontrol.com.*"
+      "https?://.*\\.googlesyndication\\.com.*",
+      "https?://.*\\.bkrtx\\.com.*",
+      "https?://.*\\.getsitecontrol\\.com.*",
+      "https?://.*\\.spklw\\.com.*",
+      "https?://.*\\.googletagmanager\\.com.*",
+      "https?://.*\\.google-analytics\\.com.*",
+      "https?://.*\\.navrcholu\\.cz.*",
+      "https?://c.imedia.cz/js/partnerapi.*\\.js",
+      "https?://.*\\.googleapis\\.com.*"
     ).foreach(x => proxy.blacklistRequests(x, 404))
     driver = new ChromeDriver(capabilities)
   }
