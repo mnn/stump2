@@ -13,7 +13,8 @@ case class ArticlePreview(
                            commentsCount: Option[Int],
                            imageUrl: String,
                            isActuality: Boolean,
-                           parsedDate: String
+                           parsedDate: String,
+                           isPr: Boolean
                          )
 
 case class Article(

@@ -99,8 +99,10 @@ class Ripper {
     val imageDataSrc = elem.select(".article__img img").attr("data-src")
     val imageUrl = if (imageDataSrc.isEmpty) imageSrc else imageDataSrc
 
+    val pr = elem.select(".article__marker").text() == "Komerční sdělení"
+
     if (name.isEmpty) None
-    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount, imageUrl, false, getParsedDateString(date)).some
+    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount, imageUrl, false, getParsedDateString(date), pr).some
   }
 
   def getArticleList(): List[ArticlePreview] = {
