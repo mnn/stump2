@@ -100,7 +100,7 @@ class Ripper {
     val imageUrl = if (imageDataSrc.isEmpty) imageSrc else imageDataSrc
 
     if (name.isEmpty) None
-    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount.toList, imageUrl, false, getParsedDateString(date)).some
+    else ArticlePreview(name, url, urlEncoded, perex, author, date, category, commentsCount, imageUrl, false, getParsedDateString(date)).some
   }
 
   def getArticleList(): List[ArticlePreview] = {

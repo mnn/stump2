@@ -10,7 +10,7 @@ case class ArticlePreview(
                            author: NameUrlPair,
                            date: String,
                            category: NameUrlPair,
-                           commentsCount: List[Int],
+                           commentsCount: Option[Int],
                            imageUrl: String,
                            isActuality: Boolean,
                            parsedDate: String
