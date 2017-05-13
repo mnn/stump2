@@ -1,6 +1,7 @@
 package tk.monnef.stump2
 
 import java.net.{URLDecoder, URLEncoder}
+import java.util.concurrent.TimeUnit
 
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -12,6 +13,8 @@ import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.remote.{CapabilityType, DesiredCapabilities}
 import com.github.nscala_time.time.Imports._
 import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
+import org.feijoas.mango.common.base.Suppliers._
+import org.feijoas.mango.common.cache.CacheBuilder
 
 import scalaz._
 import Scalaz._
@@ -62,7 +65,13 @@ class Ripper {
     driver.getPageSource
   }
 
-  def getParsedPage(url: String): Document = Jsoup.parse(getPageSourceCode(url), url)
+  def getFreshParsedPage(url: String): Document = Jsoup.parse(getPageSourceCode(url), url)
+
+  val getParsedPageMemoized =
+    CacheBuilder.newBuilder()
+    .maximumSize(10)
+    .expireAfterWrite(5, TimeUnit.MINUTES)
+    .build(getFreshParsedPage _)
 
   def getText(elem: Element, selector: String): String = elem.select(selector).text()
 
@@ -95,7 +104,7 @@ class Ripper {
     val name = gTxt("h3.article__heading, h3.opener__heading")
     val url = gUrl("a.link-block")
     val urlEncoded = URLEncoder.encode(url, "UTF-8")
-    val perex = gTxt(".perex")
+    val perex = gTxt(".perex, .article__perex")
     val author = gLink(".impressum__author")
     val date = gTxt(".impressum__date")
     val category = gLink(".impressum__rubric")
@@ -112,14 +121,15 @@ class Ripper {
   }
 
   def getArticleList(): List[ArticlePreview] = {
-    val articleElems = getParsedPage(BaseUrl).select(".page-block--opener, .article.article--content").asScala
+    val articleElems = getParsedPageMemoized(BaseUrl).select(".page-block--opener, .article.article--content").asScala
     articleElems.flatMap(elemToArticlePreview).toList
   }
 
   def getArticle(url: String): Article = {
     val decodedUrl = if (url.startsWith("%")) URLDecoder.decode(url, "UTF-8") else url
     val processedUrl = (if (decodedUrl.startsWith("/")) BaseUrl else "") + decodedUrl
-    val doc = getParsedPage(processedUrl)
+    val isNews = url.contains("/zpravicky/")
+    val doc = getParsedPageMemoized(processedUrl)
     val elems = doc.select(".content--detail")
     if (elems.size() != 1) println(s"problem with separating content of an article, found ${elems.size()}, expected 1.")
     val elem = elems.first()
@@ -134,13 +144,15 @@ class Ripper {
     val author = gLink(".perex__author a")
     val date = gTxt(".perex__date [itemprop='datePublished']")
     val perex = gTxt(".perex__text [itemprop='description']")
-    val body = elem.select("[itemprop='articleBody']").html()
+    val body =
+      if (isNews) elem.select("[itemprop='articleBody']").html()
+      else elem.select(".detail__article__content > :not(.perex__impressum)").outerHtml()
 
     Article(name, imageUrl, author, date, perex, body)
   }
 
   def getActualitiesList(): List[ArticlePreview] = {
-    val articleElems = getParsedPage(BaseUrl).select(".box-actualities--details .article").asScala
+    val articleElems = getParsedPageMemoized(BaseUrl).select(".box-actualities--details .article").asScala
     articleElems.flatMap(elemToArticlePreview).map(_.copy(isActuality = true)).toList
   }
 }
